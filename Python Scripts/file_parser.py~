@@ -1,0 +1,45 @@
+import glob   
+import re
+import matplotlib
+from matplotlib import pyplot
+path = 'C:\/Python27\/reading_hbase\/*.log'   
+files=glob.glob(path)   
+print "Target\tThread\tThroughput\tUpdateLatency\tReadLatency"
+hash_throughput = dict()
+hash_latency = dict()
+for file in files:     
+	filedetails = file.split("_");
+	target = filedetails[2]
+	threadvalue = filedetails[3].split(".")
+	thread = threadvalue[0]
+	if thread not in hash_throughput:
+			hash_throughput[thread] = []
+	if thread not in hash_latency:
+			hash_latency[thread] = []
+	f=open(file, 'r') 
+	for line in f:
+		throughput = re.search('(?<=\[OVERALL\], Throughput\(ops\/sec\), )\d+\.\d+', line)
+		if throughput:
+			throughputvalue = throughput.group(0)
+		m = re.search('(?<=\[UPDATE\], AverageLatency\(us\), )\d+\.\d+', line)	
+		if m:
+			updatevalue = m.group(0)
+		#readpattern = re.search('(?<=\[READ\], AverageLatency\(us\), )\d+\.\d+', line)
+		#if readpattern:
+		#	readvalue = readpattern.group(0)
+	#print target+"\t"+thread+"\t"+throughputvalue+"\t"+updatevalue+"\t"+readvalue
+#	hash_throughput[thread].append(throughputvalue)
+	#hash_throughput[thread][throughputvalue] = {}
+	#hash_throughput[thread][throughputvalue].append(updatevalue)
+	print throughputvalue
+	throughputvalue = round(throughputvalue,0)
+
+	hash_throughput.setdefault(thread,{})[throughputvalue] = {}
+	#hash_latency[thread].append(updatevalue)
+	f.close()
+#print hash_throughput['5']
+#print hash_latency['5']
+
+#pyplot.plot(hash_throughput['5'], hash_latency['5'])   # plot magnitude
+#pyplot.title('Throughput vs Update')
+#pyplot.show()
